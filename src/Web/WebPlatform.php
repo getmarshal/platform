@@ -8,8 +8,6 @@ use Fig\Http\Message\StatusCodeInterface;
 use Laminas\Diactoros\Response\HtmlResponse;
 use Laminas\Diactoros\Response\JsonResponse;
 use Marshal\Platform\PlatformInterface;
-use Marshal\Platform\Web\Event\RenderTemplateEvent;
-use Mezzio\Router\RouteResult;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -51,30 +49,10 @@ final class WebPlatform implements PlatformInterface
             $options['template'] = $template;
         }
 
-        $template = $this->getTemplateName($request, $options);
-        $event = new RenderTemplateEvent($template, $data);
+        $event = new Event\RenderTemplateEvent($request, $data, $options);
         $this->eventDispatcher->dispatch($event);
 
         // return a html response
         return new HtmlResponse($event->getContents(), $status, $headers);
-    }
-
-    private function getTemplateName(ServerRequestInterface $request, array $options): string
-    {
-        if (isset($options['template']) && \is_string($options['template'])) {
-            return $options['template'];
-        }
-
-        $routeResult = $request->getAttribute(RouteResult::class);
-        if (! $routeResult instanceof RouteResult || $routeResult->isFailure()) {
-            return "marshal::error-404";
-        }
-
-        $routeOptions = $routeResult->getMatchedRoute()->getOptions();
-        if (! isset($routeOptions['template']) || ! \is_string($routeOptions['template'])) {
-            return "marshal::error-404";
-        }
-
-        return $routeOptions['template'];
     }
 }
