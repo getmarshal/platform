@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Marshal\Platform\Web;
+namespace Marshal\Platform\Web\TemplateRenderer;
 
 interface TemplateRendererInterface
 {

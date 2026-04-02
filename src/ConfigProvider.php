@@ -10,6 +10,7 @@ final class ConfigProvider
     {
         return [
             "dependencies" => $this->getDependencies(),
+            "twig" => $this->getTwigConfig(),
         ];
     }
 
@@ -17,9 +18,42 @@ final class ConfigProvider
     {
         return [
             "factories" => [
-                PlatformMiddleware::class                              => PlatformMiddlewareFactory::class,
-                API\APIPlatform::class                                 => API\APIPlatformFactory::class,
-                Web\WebPlatform::class                                 => Web\WebPlatformFactory::class,
+                PlatformMiddleware::class                                       => PlatformMiddlewareFactory::class,
+                API\APIPlatform::class                                          => API\APIPlatformFactory::class,
+                Web\WebPlatform::class                                          => Web\WebPlatformFactory::class,
+                Web\TemplateRenderer\TemplateRendererResolverInterface::class   => Web\TemplateRenderer\TempateRendererResolverFactory::class,
+                Web\TemplateRenderer\Twig\RuntimeLoader::class                  => Web\TemplateRenderer\Twig\RuntimeLoaderFactory::class,
+                Web\TemplateRenderer\Twig\TwigTemplateRenderer::class           => Web\TemplateRenderer\Twig\TwigTemplateRendererFactory::class,
+            ],
+        ];
+    }
+
+    private function getTwigConfig(): array
+    {
+        return [
+            "runtime_loaders" => [
+                Web\TemplateRenderer\Twig\RuntimeLoader::class,
+            ],
+            "functions" => [
+                [
+                    "name" => "media",
+                    "callable" => [Web\TemplateRenderer\Twig\UrlExtension::class, "media"],
+                    "options" => [
+                        "needs_context" => true,
+                    ],
+                ],
+                [
+                    "name" => "path",
+                    "callable" => [Web\TemplateRenderer\Twig\UrlExtension::class, "path"],
+                ],
+                [
+                    "name" => "static",
+                    "callable" => [Web\TemplateRenderer\Twig\UrlExtension::class, "static"],
+                    "options" => [
+                        "needs_context" => true,
+                        "needs_environment" => true,
+                    ],
+                ],
             ],
         ];
     }
